@@ -1,15 +1,11 @@
-// 这个文件定义了EasyPR里所有特征生成的函数
-// 所属命名空间为easypr
-// 这个部分中的特征由easypr的开发者修改
-
 #include "easypr/core/feature.h"
 #include "easypr/core/core_func.h"
+#include "thirdparty/LBP/lbp.hpp"
 
 namespace easypr {
 
-//! 获取垂直和水平的直方图图值
 
-Mat getTheFeatures(Mat in) {
+Mat getHistogram(Mat in) {
   const int VERTICAL = 0;
   const int HORIZONTAL = 1;
 
@@ -21,8 +17,6 @@ Mat getTheFeatures(Mat in) {
   int numCols = vhist.cols + hhist.cols;
 
   Mat out = Mat::zeros(1, numCols, CV_32F);
-
-  // Asign values to feature,样本特征为水平、垂直直方图
 
   int j = 0;
   for (int i = 0; i < vhist.cols; i++) {
@@ -37,9 +31,6 @@ Mat getTheFeatures(Mat in) {
   return out;
 }
 
-//! EasyPR的getFeatures回调函数
-//! 本函数是获取垂直和水平的直方图图值
-
 void getHistogramFeatures(const Mat& image, Mat& features) {
   Mat grayImage;
   cvtColor(image, grayImage, CV_RGB2GRAY);
@@ -49,32 +40,199 @@ void getHistogramFeatures(const Mat& image, Mat& features) {
   Mat img_threshold;
   threshold(grayImage, img_threshold, 0, 255,
             CV_THRESH_OTSU + CV_THRESH_BINARY);
-  features = getTheFeatures(img_threshold);
+  features = getHistogram(img_threshold);
 }
 
-//! EasyPR的getFeatures回调函数
-//! 本函数是获取SITF特征子
 
 void getSIFTFeatures(const Mat& image, Mat& features) {
 
-  //待完善
-
 }
 
-//! EasyPR的getFeatures回调函数
-//! 本函数是获取HOG特征子
 
+//HOG Features
 void getHOGFeatures(const Mat& image, Mat& features) {
+  //HOG descripter
+  HOGDescriptor * hog = new HOGDescriptor(cvSize(128, 64), cvSize(16, 16), cvSize(8, 8), cvSize(8, 8), 3);  //these parameters work well
+	std::vector<float> descriptor;
 
-  //待完善
+  // resize input image to (128,64) for compute
+	Size dsize = Size(128,64);
+	Mat trainImg = Mat(dsize, CV_32S);
+	resize(image, trainImg, dsize);
 
+  //compute descripter
+	hog->compute(trainImg, descriptor, Size(8, 8));
+
+  //copy the result
+	Mat mat_featrue(descriptor);
+	mat_featrue.copyTo(features);
 }
 
-//! EasyPR的getFeatures回调函数
-//! 本函数是获取HSV空间量化的直方图特征子
 
 void getHSVHistFeatures(const Mat& image, Mat& features) {
   // TODO
+}
+
+//! LBP feature
+void getLBPFeatures(const Mat& image, Mat& features) {
+
+  Mat grayImage;
+  cvtColor(image, grayImage, CV_RGB2GRAY);
+
+  //if (1) {
+  //  imshow("grayImage", grayImage);
+  //  waitKey(0);
+  //  destroyWindow("grayImage");
+  //}
+
+  //spatial_ostu(grayImage, 8, 2);
+
+  //if (1) {
+  //  imshow("grayImage", grayImage);
+  //  waitKey(0);
+  //  destroyWindow("grayImage");
+  //}
+
+  Mat lbpimage;
+  lbpimage = libfacerec::olbp(grayImage);
+  Mat lbp_hist = libfacerec::spatial_histogram(lbpimage, 32, 4, 4);
+
+  features = lbp_hist;
+}
+
+Mat charFeatures(Mat in, int sizeData) {
+  const int VERTICAL = 0;
+  const int HORIZONTAL = 1;
+
+  // cut the cetner, will afect 5% perices.
+  Rect _rect = GetCenterRect(in);
+  Mat tmpIn = CutTheRect(in, _rect);
+  //Mat tmpIn = in.clone();
+
+  // Low data feature
+  Mat lowData;
+  resize(tmpIn, lowData, Size(sizeData, sizeData));
+
+  // Histogram features
+  Mat vhist = ProjectedHistogram(lowData, VERTICAL);
+  Mat hhist = ProjectedHistogram(lowData, HORIZONTAL);
+
+  // Last 10 is the number of moments components
+  int numCols = vhist.cols + hhist.cols + lowData.cols * lowData.cols;
+
+  Mat out = Mat::zeros(1, numCols, CV_32F);
+  // Asign values to
+
+  int j = 0;
+  for (int i = 0; i < vhist.cols; i++) {
+    out.at<float>(j) = vhist.at<float>(i);
+    j++;
+  }
+  for (int i = 0; i < hhist.cols; i++) {
+    out.at<float>(j) = hhist.at<float>(i);
+    j++;
+  }
+  for (int x = 0; x < lowData.cols; x++) {
+    for (int y = 0; y < lowData.rows; y++) {
+      out.at<float>(j) += (float)lowData.at <unsigned char>(x, y);
+      j++;
+    }
+  }
+
+  //std::cout << out << std::endl;
+
+  return out;
+}
+
+
+Mat charFeatures2(Mat in, int sizeData) {
+  const int VERTICAL = 0;
+  const int HORIZONTAL = 1;
+
+  // cut the cetner, will afect 5% perices.
+  Rect _rect = GetCenterRect(in);
+  Mat tmpIn = CutTheRect(in, _rect);
+  //Mat tmpIn = in.clone();
+
+  // Low data feature
+  Mat lowData;
+  resize(tmpIn, lowData, Size(sizeData, sizeData));
+
+  // Histogram features
+  Mat vhist = ProjectedHistogram(lowData, VERTICAL);
+  Mat hhist = ProjectedHistogram(lowData, HORIZONTAL);
+
+  // Last 10 is the number of moments components
+  int numCols = vhist.cols + hhist.cols + lowData.cols * lowData.cols;
+
+  Mat out = Mat::zeros(1, numCols, CV_32F);
+  // Asign values to
+
+  // feature,ANN的样本特征为水平、垂直直方图和低分辨率图像所组成的矢量
+
+  int j = 0;
+  for (int i = 0; i < vhist.cols; i++) {
+    out.at<float>(j) = vhist.at<float>(i);
+    j++;
+  }
+  for (int i = 0; i < hhist.cols; i++) {
+    out.at<float>(j) = hhist.at<float>(i);
+    j++;
+  }
+  for (int x = 0; x < lowData.cols; x++) {
+    for (int y = 0; y < lowData.rows; y++) {
+      out.at<float>(j) += (float)lowData.at <unsigned char>(x, y);
+      j++;
+    }
+  }
+
+  //std::cout << out << std::endl;
+
+  return out;
+}
+
+
+void getLBPplusHistFeatures(const Mat& image, Mat& features) {
+  // TODO
+  Mat grayImage;
+  cvtColor(image, grayImage, CV_RGB2GRAY);
+
+  Mat lbpimage;
+  lbpimage = libfacerec::olbp(grayImage);
+  Mat lbp_hist = libfacerec::spatial_histogram(lbpimage, 64, 8, 4);
+  //features = lbp_hist.reshape(1, 1);
+
+  Mat greyImage;
+  cvtColor(image, greyImage, CV_RGB2GRAY);
+  //Mat src_hsv;
+  //cvtColor(image, src_hsv, CV_BGR2HSV);
+  //std::vector<cv::Mat> hsvSplit;
+  //split(src_hsv, hsvSplit);
+
+  /*std::vector<cv::Mat> bgrSplit;
+  split(image, bgrSplit);*/
+
+  //grayImage = histeq(grayImage);
+  Mat img_threshold;
+  threshold(greyImage, img_threshold, 0, 255,
+    CV_THRESH_OTSU + CV_THRESH_BINARY);
+  Mat histomFeatures = getHistogram(img_threshold);
+
+  /*Mat img_threshold2;
+  threshold(bgrSplit[1], img_threshold2, 0, 255,
+  CV_THRESH_OTSU + CV_THRESH_BINARY);
+  Mat greenHistomFeatures = getTheFeatures(img_threshold2);
+
+  Mat histomFeatures;
+  hconcat(blueHistomFeatures.reshape(1, 1), greenHistomFeatures.reshape(1, 1), histomFeatures);*/
+
+  //Mat histomFeatures = getTheColorFeatures(greyImage);
+
+  //features.push_back(histomFeatures.reshape(1, 1));
+
+  hconcat(lbp_hist.reshape(1, 1), histomFeatures.reshape(1, 1), features);
+  //std::cout << features << std::endl;
+  //features = histomFeatures;
 }
 
 }

@@ -1,13 +1,13 @@
 #ifndef EASYPR_CORE_FEATURE_H_
 #define EASYPR_CORE_FEATURE_H_
 
-#include <opencv2/opencv.hpp>
+#include "opencv2/opencv.hpp"
 
 namespace easypr {
 
 //! 获得车牌的特征数
 
-cv::Mat getTheFeatures(cv::Mat in);
+cv::Mat getHistogram(cv::Mat in);
 
 //! EasyPR的getFeatures回调函数
 //! 用于从车牌的image生成svm的训练特征features
@@ -30,6 +30,16 @@ void getHOGFeatures(const cv::Mat& image, cv::Mat& features);
 //! 本函数是获取HSV空间量化的直方图特征子
 
 void getHSVHistFeatures(const cv::Mat& image, cv::Mat& features);
+
+//! LBP feature
+void getLBPFeatures(const cv::Mat& image, cv::Mat& features);
+
+//! get character feature
+cv::Mat charFeatures(cv::Mat in, int sizeData);
+cv::Mat charFeatures2(cv::Mat in, int sizeData);
+
+//! LBP feature + Histom feature
+void getLBPplusHistFeatures(const cv::Mat& image, cv::Mat& features);
 
 } /*! \namespace easypr*/
 

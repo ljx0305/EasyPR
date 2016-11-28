@@ -1,6 +1,6 @@
 # EasyPR
 
-EasyPR是一个中文的开源车牌识别系统，其目标是成为一个简单、高效、准确的车牌识别引擎。
+EasyPR是一个开源的中文车牌识别系统，其目标是成为一个简单、高效、准确的车牌识别库。
 
 相比于其他的车牌识别系统，EasyPR有如下特点：
 
@@ -10,25 +10,65 @@ EasyPR是一个中文的开源车牌识别系统，其目标是成为一个简�
 
 ### 更新
 
-本次更新是1.4 正式版，主要改进在于几个方面：
+当前master分支下的版本有以下几点更新：
 
-1.代码统一为UTF-8格式，多平台的Shell不再出现乱码。
+1.支持linux和mac编译，如果碰到问题请在issue里提问。
 
-2.支持opencv3.0与3.1，注意，这与opencv2.x不兼容，要想支持的话请下载1.3版本。
+2.增加一个无需配置opencv的[懒人版](http://git.oschina.net/easypr/EasyPR/attach_files)。仅仅支持vs2013，也只能在debug和x86下运行，其他情况的话还是得配置opencv。感谢范文捷同学的帮助。页面里的两个文件都要下载，下载后用[7zip](http://www.7-zip.org/)解压。
 
-3.ANN训练开放。
+本次更新是EasyPR 1.5beta版本，主要改进如下：
 
-4.修正了SVM训练异常的问题。
+1.增加了一种新的基于文字定位的定位方法 (MSER), 在面对低对比度，低光照以及大图像上有较强的鲁棒性。
 
-5.代码优化。
+* 夜间的车牌图像
 
-不知道怎么下载以前的版本的小伙伴可以在github或gitosc的"branch"里选择"tags"，然后点击"v1.3"，再然后点击"download zip"。当然如果直接git clone的话可以随时方便切换。
+![夜间的车牌图像](resources/doc/res/night_1.jpg)
 
-在后面的版本中计划做以下几点改善：
+* 对比度非常低的图像
 
-1.新的评价框架，更加合理的评估数据。
+![对比度非常低的图像](resources/doc/res/contrast_1.jpg)
 
-2.新的车牌定位算法。
+* 近距离的图像
+
+![近距离的图像](resources/doc/res/near_1.jpg)
+
+* 高分辨率的图像
+
+![高分辨率的图像](resources/doc/res/big_1.jpg)
+
+2.更加合理的评价协议。结合新增的GroundTruth文件与ICDAR2003的协议，使得整体评价指标更为合理。通用数据集里同时增加了近50张新图片。文字定位方法在面对这些复杂图片时比先前的SOBEL+COLOR的方法定位率提升了27个百分点。
+
+实际运行时，使用了文字定位与颜色定位的结合，最终对256张的测试图片的测试结果如下：
+
+![v1.5版运行结果](resources/doc/res/v1.5_result.jpg)
+
+3.使用了非极大值抑制算法去除相邻的车牌，使得最终输出变的合理。即便使用多个定位方法，最终也只会输出一个车牌，而且是可能性最大的车牌。
+
+4.基于局部空间的大津阈值算法与自适应阈值算法，提升了文字分割与分子识别的准确率。
+
+* 车牌图像
+
+![车牌图像](resources/doc/res/not_avg_contrast.jpg)
+
+* 普通大津阈值结果
+
+![普通大津阈值结果](resources/doc/res/normal_ostu.jpg)
+
+* 空间大津阈值结果
+
+![空间大津阈值结果](resources/doc/res/spatial_ostu.jpg)
+
+5.新的SVM模型与特征（LBP），提升了车牌判断的鲁棒性，新的中文ANN识别模型，提升了中文识别的整体准确率近15个百分点。
+
+6.增加了Grid Search方法，可以进行自动调参。
+
+7.首次增加了多线程支持，基于OpenMP的文字定位方法，在最终的识别速度上，比原先的单线程方法提高了接近2倍。
+
+8.替换了一部分中文注释，使得windows下的visual studio在面对全部以LF结尾的文件时，也能成功通过编译。目前的程序只要opencv配置正确，gitosc上通过zip下载下来的程序可以直接通过编译并运行。
+
+关于本次改动的具体内容可以看博客中的[介绍](http://www.cnblogs.com/subconscious/p/5637735.html)。
+
+注意，目前1.4和1.5版的SVM训练好的文件在使用时会有问题，这个原因可能跟opencv3的实现改变有关。建议要训练SVM的话使用基于opencv2的1.3版。
 
 ### 跨平台
 
@@ -36,10 +76,10 @@ EasyPR是一个中文的开源车牌识别系统，其目标是成为一个简�
 
 |版本 | 开发者 | 版本 | 地址 
 |------|-------|-------|-------
-| android |  goldriver  |  1.3  |  [linuxxx/EasyPR_Android](https://github.com/linuxxx/EasyPR_Android)
-| linux | Micooz  |  1.4  |  已跟EasyPR整合
+| android |  goldriver  |  1.4  |  [linuxxx/EasyPR_Android](https://github.com/linuxxx/EasyPR_Android)
+| linux | Micooz  |  1.5  |  已跟EasyPR整合
 | ios | zhoushiwei |  1.3  |  [zhoushiwei/EasyPR-iOS](https://github.com/zhoushiwei/EasyPR-iOS)
-| mac | zhoushiwei,Micooz |  1.4  | 已跟EasyPR整合
+| mac | zhoushiwei,Micooz |  1.5  | 已跟EasyPR整合
 | java | fan-wenjie |  1.2  | [fan-wenjie/EasyPR-Java](https://github.com/fan-wenjie/EasyPR-Java)
 
 ### 兼容性
@@ -59,6 +99,86 @@ EasyPR是一个中文的开源车牌识别系统，其目标是成为一个简�
 接着，我们对图块进行OCR过程，在EasyPR中，叫做字符识别（CharsRecognize）。我们得到了一个包含车牌颜色与字符的字符串：
 
 “蓝牌：苏EUK722”
+
+### 示例
+
+EasyPR的调用非常简单，下面是一段示例代码:
+```c++
+	CPlateRecognize pr;
+	pr.setResultShow(false);
+	pr.setDetectType(PR_DETECT_CMSER);
+     
+	vector<CPlate> plateVec;
+	Mat src = imread(filepath);
+	int result = pr.plateRecognize(src, plateVec);
+```
+
+我们首先创建一个CPlateRecognize的对象pr，接着设置pr的属性。
+
+```c++
+	pr.setResultShow(false);
+```
+
+这句话设置EasyPR是否打开结果展示窗口，如下图。设置为true就是打开，否则就是关闭。在需要观看定位结果时，建议打开，快速运行时关闭。
+
+![EasyPR 输出窗口](resources/doc/res/window.png)
+
+```c++
+	pr.setDetectType(PR_DETECT_CMSER);
+```
+
+这句话设置EasyPR采用的车牌定位算法。CMER代表文字定位方法，SOBEL和COLOR分别代表边缘和颜色定位方法。可以通过"|"符号结合。
+
+```c++
+	pr.setDetectType(PR_DETECT_COLOR | PR_DETECT_SOBEL);
+```
+
+除此之外，还可以有一些其他的属性值设置：
+
+```c++
+	pr.setLifemode(true);
+```
+
+这句话设置开启生活模式，这个属性在定位方法为SOBEL时可以发挥作用，能增大搜索范围，提高鲁棒性。
+
+```c++
+	pr.setMaxPlates(4);
+```
+
+这句话设置EasyPR最多查找多少个车牌。当一副图中有大于n个车牌时，EasyPR最终只会输出可能性最高的n个。
+
+下面来看pr的方法。plateRecognize()这个方法有两个参数，第一个代表输入图像，第二个代表输出的车牌CPlate集合。
+
+```c++
+	vector<CPlate> plateVec;
+	Mat src = imread(filepath);
+	int result = pr.plateRecognize(src, plateVec);
+```
+
+当返回结果result为0时，代表识别成功，否则失败。
+
+CPlate类包含了车牌的各种信息，其中重要的如下：
+
+```c++
+	CPlate plate = plateVec.at(i);
+	Mat plateMat = plate.getPlateMat();
+	RotatedRect rrect = plate.getPlatePos();
+	string license = plate.getPlateStr();
+```
+
+plateMat代表车牌图像，rrect代表车牌的可旋转矩形位置，license代表车牌字符串，例如“蓝牌：苏EUK722”。
+
+这里说下如何去阅读如下图的识别结果。
+
+![EasyPR DetectResults](resources/doc/res/one_image_detect.jpg)
+
+第1行代表的是图片的文件名。
+
+第2行代表GroundTruth车牌，用后缀（g）表示。第3行代表EasyPR检测车牌，用后缀（d）表示。两者形成一个配对，第4行代表两者的字符差距。
+
+下面同上。本图片中有3个车牌，所有共有三个配对。最后的Recall等指标代表的是整幅图片的定位评价，考虑了三个配对的结果。
+
+有时检测车牌的部分会用“无车牌”与“No string”替代。“无车牌”代表“定位不成功”，“No string”代表“定位成功但字符分割失败”。
 
 ### 版权
 
@@ -134,11 +254,11 @@ EasyPR的resources/image/general_test文件夹下的图片数据遵循[GDSL协�
 
 如果你在使用过程中遇到任何问题，请在[这里](https://github.com/liuruoze/EasyPR/issues)告诉我们。
 
-EasyPR讨论QQ群号是：366392603，加前请注明EasyPR学习讨论。
+EasyPR讨论QQ群号是：一群：366392603(已满)，二群：583022188， 加前请注明EasyPR学习讨论。
 
 ### Contributors
 
-* liuruoze：1.0-1.2版作者
+* liuruoze：1.0-1.2，1.5版作者
 
 * 海豚嘎嘎(车主之家)：1.3版算法贡献者，提升了车牌定位与字符识别的准确率
 
@@ -151,6 +271,8 @@ EasyPR讨论QQ群号是：366392603，加前请注明EasyPR学习讨论。
 * ahccom：新的plateLocate函数
 
 * 阿水：1.3版整合，数据标注等工作
+
+* fan-wenjie：1.5版opencv整合版提供者
 
 ### 鸣谢
 

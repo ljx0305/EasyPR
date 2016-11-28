@@ -69,6 +69,7 @@
     <OutDir>$(SolutionDir)_build\</OutDir>
     <IntDir>$(SolutionDir)_build\libeasypr\debug\</IntDir>
     <TargetExt>.lib</TargetExt>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <TargetExt>.lib</TargetExt>
@@ -86,9 +87,12 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>%OPENCV%\include;$(SolutionDir)include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(SolutionDir);$(OPENCV)/include</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4819</DisableSpecificWarnings>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+      <OpenMPSupport>true</OpenMPSupport>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -149,7 +153,7 @@
     <ClCompile Include="..\src\core\chars_segment.cpp" />
     <ClCompile Include="..\src\core\core_func.cpp" />
     <ClCompile Include="..\src\core\feature.cpp" />
-    <ClCompile Include="..\src\core\plate.cpp" />
+    <ClCompile Include="..\src\core\params.cpp" />
     <ClCompile Include="..\src\core\plate_detect.cpp" />
     <ClCompile Include="..\src\core\plate_judge.cpp" />
     <ClCompile Include="..\src\core\plate_locate.cpp" />
@@ -163,17 +167,23 @@
     <ClCompile Include="..\src\util\kv.cpp" />
     <ClCompile Include="..\src\util\program_options.cpp" />
     <ClCompile Include="..\src\util\util.cpp" />
+    <ClCompile Include="..\thirdparty\LBP\helper.cpp" />
+    <ClCompile Include="..\thirdparty\LBP\lbp.cpp" />
+    <ClCompile Include="..\thirdparty\mser\mser2.cpp" />
+    <ClCompile Include="..\thirdparty\textDetect\erfilter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\easypr.h" />
     <ClInclude Include="..\include\easypr\api.hpp" />
     <ClInclude Include="..\include\easypr\config.h" />
+    <ClInclude Include="..\include\easypr\core\character.hpp" />
     <ClInclude Include="..\include\easypr\core\chars_identify.h" />
     <ClInclude Include="..\include\easypr\core\chars_recognise.h" />
     <ClInclude Include="..\include\easypr\core\chars_segment.h" />
     <ClInclude Include="..\include\easypr\core\core_func.h" />
     <ClInclude Include="..\include\easypr\core\feature.h" />
-    <ClInclude Include="..\include\easypr\core\plate.h" />
+    <ClInclude Include="..\include\easypr\core\params.h" />
+    <ClInclude Include="..\include\easypr\core\plate.hpp" />
     <ClInclude Include="..\include\easypr\core\plate_detect.h" />
     <ClInclude Include="..\include\easypr\core\plate_judge.h" />
     <ClInclude Include="..\include\easypr\core\plate_locate.h" />
@@ -187,9 +197,14 @@
     <ClInclude Include="..\include\easypr\util\program_options.h" />
     <ClInclude Include="..\include\easypr\util\switch.hpp" />
     <ClInclude Include="..\include\easypr\util\util.h" />
+    <ClInclude Include="..\thirdparty\LBP\helper.hpp" />
+    <ClInclude Include="..\thirdparty\LBP\lbp.hpp" />
+    <ClInclude Include="..\thirdparty\mser\mser2.hpp" />
+    <ClInclude Include="..\thirdparty\textDetect\erfilter.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\LICENSE" />
+    <None Include="..\README.md" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\关于版权.txt" />

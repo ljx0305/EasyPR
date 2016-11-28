@@ -16,26 +16,38 @@
 #include "easypr/core/chars_recognise.h"
 
 /*! \namespace easypr
-    Namespace where all the C++ EasyPR functionality resides
+Namespace where all the C++ EasyPR functionality resides
 */
 namespace easypr {
 
-class CPlateRecognize : public CPlateDetect, public CCharsRecognise {
- public:
-  CPlateRecognize();
+  class CPlateRecognize : public CPlateDetect, public CCharsRecognise {
+  public:
+    CPlateRecognize();
 
-  //! 车牌检测与字符识别
+    int plateRecognize(Mat src, std::vector<CPlate> &plateVec, int img_index = 0);
+    int plateRecognize(Mat src, std::vector<std::string> &licenseVec);
+    int plateRecognize(Mat src, std::vector<CPlate> &plateVec, int img_index, Mat& output, const vector<CPlate>& plateVecGT);
 
-  int plateRecognize(Mat src, std::vector<std::string> &licenseVec);
+    int plateRecognizeAsText(Mat src, std::vector<CPlate> &licenseVec);
+    int plateRecognizeAsTextNM(Mat src, std::vector<CPlate> &licenseVec);
 
-  //! 生活模式与工业模式切换
+    inline void setLifemode(bool param) { CPlateDetect::setPDLifemode(param); }
+    inline void setDetectType(int param) { CPlateDetect::setDetectType(param); }
 
-  inline void setLifemode(bool param) { CPlateDetect::setPDLifemode(param); }
+    inline void setResultShow(bool param) { m_showResult = param; }
+    inline bool getResultShow() const { return m_showResult; }
 
-  //! 是否开启调试模式
+    inline void setDetectShow(bool param) { CPlateDetect::setDetectShow(param); }
+    inline void setDebug(bool param) { setResultShow(param); }
 
-  inline void setDebug(bool param) { CPlateDetect::setPDDebug(param); }
-};
+    void LoadSVM(std::string path);
+    void LoadANN(std::string path);
+    void LoadChineseANN(std::string path);
+
+  private:
+    // show the detect and recognition result image
+    bool m_showResult;
+  };
 
 } /* \namespace easypr  */
 

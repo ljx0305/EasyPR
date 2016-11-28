@@ -11,16 +11,14 @@ using namespace std;
 int test_plate_locate() {
   cout << "test_plate_locate" << endl;
 
-  const string file = "resources/image/test.jpg";
+  const string file = "resources/image/plate_locate.jpg";
 
   cv::Mat src = imread(file);
 
-  // TODO：原plateLocate需要被替换
-
   vector<cv::Mat> resultVec;
   CPlateLocate plate;
-  plate.setDebug(1);
-  plate.setLifemode(true);
+  //plate.setDebug(0);
+  //plate.setLifemode(true);
 
   int result = plate.plateLocate(src, resultVec);
   if (result == 0) {
@@ -109,15 +107,20 @@ int test_plate_recognize() {
 
   CPlateRecognize pr;
   pr.setLifemode(true);
-  pr.setDebug(true);
+  pr.setDebug(false);
+  pr.setMaxPlates(4);
+  //pr.setDetectType(PR_DETECT_COLOR | PR_DETECT_SOBEL);
+  pr.setDetectType(easypr::PR_DETECT_CMSER);
 
-  vector<string> plateVec;
+  //vector<string> plateVec;
+  vector<CPlate> plateVec;
 
   int result = pr.plateRecognize(src, plateVec);
+  //int result = pr.plateRecognizeAsText(src, plateVec);
   if (result == 0) {
     size_t num = plateVec.size();
     for (size_t j = 0; j < num; j++) {
-      cout << "plateRecognize: " << plateVec[j] << endl;
+      cout << "plateRecognize: " << plateVec[j].getPlateStr() << endl;
     }
   }
 
